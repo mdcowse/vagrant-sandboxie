@@ -34,7 +34,7 @@ $cd = @{
 
 #Define user and password for ADDomain deployment (also used for restore).
 $password = ConvertTo-SecureString "vagrant" -AsPlainText -Force
-$cred = New-Object System.Management.Automation.PSCredential('party.hard\vagrant',$password)
+$cred = New-Object System.Management.Automation.PSCredential('party.hard\administrator',$password)
 
 #Create MOF
 JoinDomainConfiguration -Credential $cred -ConfigurationData $cd
