@@ -1,0 +1,2 @@
+[wp]
+lab-wordpress.party.hard	ansible_connection=local

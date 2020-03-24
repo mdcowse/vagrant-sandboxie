@@ -1,0 +1,30 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$post_up_msg = <<-MSG
+------------------------------------------------------
+Provision is done. Great!
+
+You can install or admin wordpress by URLS:
+
+ - Website       - http://127.0.0.1/
+ - Admin Panel   - http://127.0.0.1/wp-admin
+ - Phpmyadmin    - http://127.0.0.1/phpmyadmin (root without password)
+
+------------------------------------------------------
+MSG
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+  config.vagrant.plugins = "vagrant-reload"
+  config.vm.hostname = "lab-wordpress.party.hard"
+  config.vm.network "forwarded_port", guest: 80, host: 80
+  config.vm.synced_folder "../provision/wordpress", "/vagrant"
+  #Install Ansible
+  config.vm.provision "shell",
+    inline: "yum install -y ansible"
+  #Deploy wordpress project with Ansible
+  config.vm.provision "shell",
+    inline: "ansible-playbook /vagrant/wordpress.yml -i /vagrant/hosts"
+  config.vm.post_up_message = $post_up_msg
+end

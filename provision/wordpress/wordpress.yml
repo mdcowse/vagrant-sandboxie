@@ -1,0 +1,125 @@
+  - hosts: wp
+    become: yes
+    tasks:
+      - name: Disable SELinux
+        selinux:
+          state: disabled
+
+      - name: Install remi repo.
+        yum:
+          name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+          state: present
+
+      - name: Import remi GPG key.
+        rpm_key:
+          key: http://rpms.remirepo.net/RPM-GPG-KEY-remi
+          state: present
+
+      - name: Enable php72 repo
+        ini_file:
+          dest: /etc/yum.repos.d/remi-php72.repo
+          section: remi-php72
+          option: enabled
+          value: 1
+
+      - name: Add official MariaDB repository
+        yum_repository:
+          name: MariaDB
+          description: Official MariaDB repository
+          baseurl: "http://yum.mariadb.org/10.0/centos7-amd64"
+          gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+          gpgcheck: true
+
+      - name: Install a list of packages
+        yum:
+          name:
+            - unzip
+            - httpd
+            - php
+            - php-cli
+            - php-fpm
+            - php-mysqlnd
+            - php-zip
+            - php-devel
+            - php-gd
+            - php-mcrypt
+            - php-mbstring
+            - php-curl
+            - php-xml
+            - php-pear
+            - php-bcmath
+            - php-json
+            - mariadb-server
+            - mariadb-devel
+            - phpmyadmin
+            - python-devel
+            - python-pip
+          state: present
+
+      - name: Install pip MySQL-python
+        pip:
+          name: MySQL-python
+
+      - name: Provisioning httpd
+        copy:
+          src: httpd.conf
+          dest: /etc/httpd/conf/httpd.conf
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Provisioning phpMyAdmin
+        copy:
+          src: phpMyAdmin.conf
+          dest: /etc/httpd/conf.d/phpMyAdmin.conf
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Provisioning MySQL
+        copy:
+          src: config.inc.php
+          dest: /etc/phpMyAdmin/config.inc.php
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Provisioning php
+        copy:
+          src: php.ini
+          dest: /etc/php.ini
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Unarchive wp-project
+        unarchive:
+          src: /vagrant/wp-project/project.zip
+          dest: /var/www/html
+          #remote_src: True
+
+      - name: Provisioning Wordpress
+        copy:
+          src: wp-config.php
+          dest: /var/www/html/wp-config.php
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Start services httpd & mariadb
+        service:
+          name: "{{ item }}"
+          state: started
+          enabled: yes
+        with_items:
+          - httpd
+          - mysql
+          
+      - name: Import Wordpress database
+        mysql_db:
+          name: wordpress
+          state: import
+          target: /vagrant/wp-project/db.sql
+
+      - name: Changing siteurl and home in wordpress db
+        command: mysql -uroot -e "UPDATE wp_options SET option_value = 'http://127.0.0.1' where option_name = 'home' OR option_name ='siteurl';" wordpress
