@@ -1,0 +1,2 @@
+[hosts-zabbix]
+lab-zabbix.party.hard	ansible_connection=local

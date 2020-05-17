@@ -20,7 +20,7 @@
           dest: /etc/yum.repos.d/remi-php72.repo
           section: remi-php72
           option: enabled
-          value: 1
+          value: "1"
 
       - name: Add official MariaDB repository
         yum_repository:
@@ -114,7 +114,7 @@
         with_items:
           - httpd
           - mysql
-          
+
       - name: Import Wordpress database
         mysql_db:
           name: wordpress

@@ -1,0 +1,112 @@
+  - hosts: hosts-zabbix
+    become: yes
+    vars:
+      version: 5.0
+
+    tasks:
+      - name: Disable SELinux.
+        selinux:
+          state: disabled
+
+      - name: Install Zabbix repo.
+        yum:
+          name: https://repo.zabbix.com/zabbix/{{ version }}/rhel/7/x86_64/zabbix-release-{{ version }}-1.el7.noarch.rpm
+          state: present
+
+      - name: Import Zabbix GPG key.
+        rpm_key:
+          key: http://repo.zabbix.com/RPM-GPG-KEY-ZABBIX
+          state: present
+
+      - name: Enable Zabbix repo.
+        when: version|float >= 5.0
+        ini_file:
+          dest: /etc/yum.repos.d/zabbix.repo
+          section: zabbix-frontend
+          option: enabled
+          value: "1"
+
+      - name: Install MariaDB and Zabbix packages.
+        yum:
+          name:
+            - mariadb
+            - mariadb-server
+            - zabbix-server-mysql
+          state: present
+
+      - name: Install zabbix-web-mysql.
+        when: version|float < 5.0
+        yum:
+          name:
+            - zabbix-web-mysql
+          state: present
+
+      - name: Install centos-release-scl package.
+        when: version|float >= 5.0
+        yum:
+          name:
+            - centos-release-scl
+          state: present
+
+      - name: Install zabbix 5.0+ packages.
+        when: version|float >= 5.0
+        yum:
+          name:
+            - zabbix-web-mysql-scl
+            - zabbix-apache-conf-scl
+          state: present
+
+      - name: Start mariadb service.
+        service:
+          name: mariadb
+          state: started
+          enabled: yes
+
+      - name: Create zabbix database.
+        command: mysql -uroot -e "create database zabbix character set utf8 collate utf8_bin;"
+
+      - name: Create and grant privileges zabbix user in MySQL.
+        command: mysql -uroot -e "grant all privileges on zabbix.* to zabbix@localhost;"
+
+      - name: Import zabbix database.
+        shell: zcat /usr/share/doc/zabbix-server-mysql-{{ version }}.*/create.sql.gz | mysql -uroot zabbix
+        args:
+          warn: no
+
+      - name: Changing timezone.
+        when: version|float < 5.0
+        lineinfile:
+          path: /etc/httpd/conf.d/zabbix.conf
+          regexp: '^date.timezone'
+          line: php_value date.timezone Europe/Moscow
+
+      - name: Changing timezone in Zabbix 5.0+.
+        when: version|float >= 5.0
+        lineinfile:
+          path: /etc/opt/rh/rh-php72/php-fpm.d/zabbix.conf
+          regexp: '^date.timezone'
+          line: php_value[date.timezone] = Europe/Moscow
+
+      - name: Provisioning Zabbix frontend settings.
+        copy:
+          src: zabbix.conf.php
+          dest: /etc/zabbix/web/zabbix.conf.php
+          owner: apache
+          group: apache
+          mode: 0644
+
+      - name: Start and enable httpd and zabbix-sever services.
+        service:
+          name: "{{ item }}"
+          state: started
+          enabled: yes
+        with_items:
+          - httpd
+          - zabbix-server
+
+      - name: Start rh-php72-php-fpm service.
+        when: version|float >= 5.0
+        service:
+          name: rh-php72-php-fpm
+          state: started
+          enabled: yes

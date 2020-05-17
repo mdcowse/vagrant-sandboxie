@@ -3,9 +3,9 @@
 
 $post_up_msg = <<-MSG
 ------------------------------------------------------
-Provision is done. Great!
+Provision has done. Great!
 
-You can install or admin wordpress by URLS:
+You can access your wordpress by URLS:
 
  - Website       - http://127.0.0.1/
  - Admin Panel   - http://127.0.0.1/wp-admin
@@ -20,6 +20,9 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "lab-wordpress.party.hard"
   config.vm.network "forwarded_port", guest: 80, host: 80
   config.vm.synced_folder "../provision/wordpress", "/vagrant"
+  #Install Epel repo
+  config.vm.provision "shell",
+    inline: "yum install -y epel-release"
   #Install Ansible
   config.vm.provision "shell",
     inline: "yum install -y ansible"

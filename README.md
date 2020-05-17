@@ -69,3 +69,9 @@ Descriptions of ready scenarios are below:
 * lab-rds1.party.hard - OS: Windows Server 2019, HW: 1 core, 1GB. Roles: Key RDS (Session host, Connection broker, Web Access).
 * lab-rdgw1.party.hard - OS: Windows Server 2019, HW: 1 core, 1GB. Roles: RD Gateway.
 * lab-client1 - OS: Windows Server 2019, HW: 1 core, 1GB.
+
+```Wordpress 1.0 - One LAMP host using for deploy Wordpress projects in test lab.``` [Read more.](./Wordpress_1.0/README.md)
+* OS: Centos 7, HW: 1 core, 512Mb.
+
+```Zabbix 1.0 - One standalone Zabbix host.``` [Read more.](./Zabbix_1.0/README.md)
+* OS: Centos 7, HW: 2 core, 1GB.
