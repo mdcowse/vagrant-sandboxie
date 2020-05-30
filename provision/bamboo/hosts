@@ -1,0 +1,2 @@
+[hosts-bamboo]
+lab-bamboo.party.hard	ansible_connection=local

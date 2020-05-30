@@ -74,4 +74,7 @@ Descriptions of ready scenarios are below:
 * OS: Centos 7, HW: 1 core, 512Mb.
 
 ```Zabbix 1.0 - One standalone Zabbix host.``` [Read more.](./Zabbix_1.0/README.md)
-* OS: Centos 7, HW: 2 core, 1GB.
+* OS: Centos 7, HW: 2 cores, 1GB.
+
+```Bamboo 1.0 - One standalone Bamboo host.``` [Read more.](./Bamboo_1.0/README.md)
+* OS: Centos 7, HW: 2 cores, 4GB.

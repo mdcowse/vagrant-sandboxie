@@ -1,0 +1,59 @@
+  - hosts: hosts-bamboo
+    become: yes
+    vars:
+      version: 7.0.4
+
+    tasks:
+      - name: Disable SELinux.
+        selinux:
+          state: disabled
+
+      - name: Install Java JDK 8
+        yum:
+          name:
+            - java-1.8.0-openjdk-devel
+          state: present
+
+      - name: Set JAVA_HOME as environment variable
+        blockinfile:
+          insertafter: EOF
+          path: /etc/environment
+          block: export JAVA_HOME=/usr/lib/jvm/java-1.8.0/jre/bin/
+
+      - name: Extract Bamboo
+        unarchive:
+          src: https://product-downloads.atlassian.com/software/bamboo/downloads/atlassian-bamboo-{{ version }}.tar.gz
+          dest: /tmp
+          mode: 0755
+          remote_src: yes
+
+      - name: Move extracted folder
+        command: mv /tmp/atlassian-bamboo-{{ version }} /root/bamboo
+
+      - name: Create Bamboo home folder
+        file:
+          path: "/var/bamboo"
+          state: directory
+          mode: 0755
+
+      - name: Provisioning bamboo-init.properties.
+        copy:
+          src: bamboo-init.properties
+          dest: /root/bamboo/atlassian-bamboo/WEB-INF/classes
+          owner: root
+          group: root
+          mode: 0755
+
+      - name: Provisioning Bamboo service
+        copy:
+          src: bamboo.service
+          dest: /etc/systemd/system
+          owner: root
+          group: root
+          mode: 0777
+
+      - name: Start the Bamboo instance
+        service:
+          name: bamboo
+          state: started
+          enabled: yes

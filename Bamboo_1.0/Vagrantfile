@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$post_up_msg = <<-MSG
+------------------------------------------------------
+Provision has done. Great! Now you can start working by URL:
+
+Now you need to enter Bamboo license key.
+Visit http://127.0.0.1:8085/ to do it and complete the installation.
+
+------------------------------------------------------
+MSG
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+  config.vagrant.plugins = "vagrant-reload"
+  config.vm.hostname = "lab-bamboo.party.hard"
+  config.vm.network "forwarded_port", guest: 8085, host: 8085
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "4096", "--cpus", "2"]
+  end
+  config.vm.synced_folder "../provision/bamboo", "/vagrant"
+  #Install epel repo
+  config.vm.provision "shell",
+    inline: "yum install -y epel-release"
+  #Install Ansible
+  config.vm.provision "shell",
+    inline: "yum install -y ansible"
+  #Install Zabbix with Ansible
+  config.vm.provision "shell",
+    inline: "ansible-playbook  /vagrant/bamboo.yml -i /vagrant/hosts"
+  config.vm.provision :reload
+  config.vm.post_up_message = $post_up_msg
+end
