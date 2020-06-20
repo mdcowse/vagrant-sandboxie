@@ -1,0 +1,22 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$post_up_msg = <<-MSG
+------------------------------------------------------
+Provision has done. Great! Now you can start working
+------------------------------------------------------
+MSG
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu1804"
+  config.vagrant.plugins = "vagrant-reload"
+  config.vm.hostname = "lab-ubuntu1804.party.hard"
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "1024", "--cpus", "2"]
+  end
+  #Install Ansible
+  config.vm.provision "shell",
+    inline: "apt-get install -y ansible"
+  config.vm.post_up_message = $post_up_msg
+end

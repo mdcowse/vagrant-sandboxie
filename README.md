@@ -24,11 +24,17 @@ Also you may need to confirm to install additional components used in this proje
 ## Scenario examples
 Descriptions of ready scenarios are below:
 
-```Localhost 1.0 - Just one workgroup windows node.```
+```Localhost 1.0 - Just one workgroup windows host.```
 * OS: Windows Server 2019, HW: 1 core, 1GB.
 
-```Localhost 1.1 - Just one workgroup windows node.```
+```Localhost 1.1 - Just one workgroup windows host.```
 * OS: Windows 10, HW: 2 cores, 2GB.
+
+```Localhost 1.2 - Just one CentOS host.```
+* OS: CentOS 7, HW: 2 cores, 1GB.
+
+```Localhost 1.3 - Just one Ubuntu 18.04 host.```
+* OS: Ubuntu 18.04, HW: 2 cores, 1GB.
 
 ```AD 1.0 - Basic AD ready deployment.```
 
