@@ -31,7 +31,12 @@ Descriptions of ready scenarios are below:
 * OS: Windows 10, HW: 2 cores, 2GB.
 
 ```Localhost 1.2 - Just one CentOS host.```
+You can change CentOS version (7 by default) by setting up version variable in Vagrantfile.
 * OS: CentOS 7, HW: 2 cores, 1GB.
+
+```Localhost 1.2.1 - Multiple CentOS hosts.```
+You can change CentOS version (7 by default) and number of hosts (3 by default) by setting up version and numbers variables in Vagrantfile.
+* OS: CentOS 7, HW: 2 cores, 1GB each.
 
 ```Localhost 1.3 - Just one Ubuntu 18.04 host.```
 * OS: Ubuntu 18.04, HW: 2 cores, 1GB.

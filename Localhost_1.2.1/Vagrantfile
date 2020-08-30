@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+#Numbers of VMs to create
+N = 3
 #CentOs version
 V = 7
 
@@ -13,16 +15,23 @@ MSG
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/#{V}"
   config.vagrant.plugins = "vagrant-reload"
-  config.vm.hostname = "lab-centos#{V}.party.hard"
-  config.vm.network "forwarded_port", guest: 80, host: 8080
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", "1024", "--cpus", "2"]
   end
-  #Install epel repo
-  config.vm.provision "shell",
-    inline: "yum install -y epel-release"
-  #Install Ansible
-  config.vm.provision "shell",
-    inline: "yum install -y ansible"
+
+  (1..N).each do |i|
+  config.vm.define "lab-centos#{V}-#{i}" do |node|
+    node.vm.hostname = "lab-centos#{V}-#{i}.party.hard"
+    node.vm.network "forwarded_port", guest: 80, host: "808#{0+i}"
+    node.vm.network :private_network, ip: "192.168.11.#{1+i}",
+			virtualbox__intnet: true
+    #Install epel repo
+    node.vm.provision "shell",
+      inline: "yum install -y epel-release"
+    #Install Ansible
+    node.vm.provision "shell",
+      inline: "yum install -y ansible"
+    end
+  end
   config.vm.post_up_message = $post_up_msg
 end
