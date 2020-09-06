@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+#Numbers of VMs to create
+N = 3
+#Ubuntu version
+V = 1804
+
+$post_up_msg = <<-MSG
+------------------------------------------------------
+Provision has done. Great! Now you can start working
+------------------------------------------------------
+MSG
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu#{V}"
+  config.vagrant.plugins = "vagrant-reload"
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "1024", "--cpus", "2"]
+  end
+
+  (1..N).each do |i|
+  config.vm.define "lab-ubuntu#{V}-#{i}" do |node|
+    node.vm.hostname = "lab-ubuntu#{V}-#{i}.party.hard"
+    node.vm.network "forwarded_port", guest: 80, host: "808#{0+i}"
+    node.vm.network :private_network, ip: "192.168.11.#{1+i}",
+			virtualbox__intnet: true
+    #Install epel repo
+    node.vm.provision "shell",
+      inline: "apt-get update"
+    #Install Ansible
+    node.vm.provision "shell",
+      inline: "apt-get install -y ansible"
+    end
+  end
+  config.vm.post_up_message = $post_up_msg
+end

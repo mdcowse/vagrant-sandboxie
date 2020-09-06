@@ -41,6 +41,10 @@ You can change CentOS version (7 by default) and number of hosts (3 by default) 
 ```Localhost 1.3 - Just one Ubuntu 18.04 host.```
 * OS: Ubuntu 18.04, HW: 2 cores, 1GB.
 
+```Localhost 1.3.1 - Multiple Ubuntu hosts.```
+You can change Ubuntu version (1804 by default) and number of hosts (3 by default) by setting up version and numbers variables in Vagrantfile.
+* OS: Ubuntu 18.04, HW: 2 cores, 1GB each.
+
 ```AD 1.0 - Basic AD ready deployment.```
 
 ![Image](images/ad10.png?raw=true)
