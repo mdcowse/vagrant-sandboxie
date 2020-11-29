@@ -1,7 +1,7 @@
   - hosts: hosts-bamboo
     become: yes
     vars:
-      version: 7.0.4
+      version: 7.1.1
 
     tasks:
       - name: Disable SELinux.
@@ -20,7 +20,7 @@
           path: /etc/environment
           block: export JAVA_HOME=/usr/lib/jvm/java-1.8.0/jre/bin/
 
-      - name: Extract Bamboo
+      - name: Download and extract Bamboo
         unarchive:
           src: https://product-downloads.atlassian.com/software/bamboo/downloads/atlassian-bamboo-{{ version }}.tar.gz
           dest: /tmp

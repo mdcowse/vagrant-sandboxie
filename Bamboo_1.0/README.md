@@ -24,7 +24,7 @@ that environment is ready to use.
 
 Note that you will need to enter the license key to complete the installation.
 
-Bamboo version 7.0.4 is using to deploy by default.
+Bamboo version 7.1.1 is using to deploy by default.
 
 ## Deploy different version of Bamboo
 If you need different Bamboo version to deploy just change the version variable
