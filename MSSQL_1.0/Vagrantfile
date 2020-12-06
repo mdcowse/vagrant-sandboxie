@@ -1,0 +1,40 @@
+$post_up_msg = <<-MSG
+------------------------------------------------------
+Provision has done. Great! Now you can connect to VM via RDP:
+
+Address: 127.0.0.1:33389
+
+Admin account: Administrator
+Password:      vagrant
+
+------------------------------------------------------
+MSG
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "gusztavvargadr/windows-server"
+  config.vm.hostname = "lab-sql"
+  config.vm.provider :virtualbox do |vb|
+  vb.gui = false
+  vb.customize ["modifyvm", :id, "--memory", "4096", "--cpus", "2"]
+end
+  config.winrm.username = "vagrant"
+  config.winrm.password = "vagrant"
+  config.winrm.transport = :plaintext
+  config.winrm.basic_auth_only = true
+  #Download SQL Server with downloader
+  config.vm.provision "shell",
+    path: "..\\provision\\MSSQL\\GetSQLServerDownloader.ps1"
+  #Check SQL Server downloading status
+  config.vm.provision "shell",
+    path: "..\\provision\\MSSQL\\CheckSQLDownload.ps1"
+  #Resolve some prerequisites
+  config.vm.provision "shell",
+    path: "..\\provision\\MSSQL\\PreDSCInstall.ps1"
+  #Install SQL Server
+  config.vm.provision "shell",
+    path: "..\\provision\\MSSQL\\DSCInstallSQLServer.ps1"
+  #Install SQL Server Management Studio
+  config.vm.provision "shell",
+    path: "..\\provision\\MSSQL\\GetSSMS.ps1"
+  config.vm.post_up_message = $post_up_msg
+end

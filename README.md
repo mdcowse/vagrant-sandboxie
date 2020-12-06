@@ -93,3 +93,6 @@ You can change Ubuntu version (1804 by default) and number of hosts (3 by defaul
 
 ```Bamboo 1.0 - One standalone Bamboo host.``` [Read more.](./Bamboo_1.0/README.md)
 * OS: Centos 7, HW: 2 cores, 4GB.
+
+```MSSQL 1.0 - One standalone Microsoft SQL Server host.``` [Read more.](./MSSQL_1.0/README.md)
+* OS: Windows Server 2019, HW: 2 cores, 4GB.
