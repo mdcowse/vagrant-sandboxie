@@ -1,0 +1,143 @@
+$post_up_msg = <<-MSG
+------------------------------------------------------
+Provision has done. Great! Now you can connect to VM via RDP:
+
+lab-sql1 address RDP: 127.0.0.1:33389
+lab-sql2 address RDP: 127.0.0.1:2200
+lab-witness address RDP: 127.0.0.1:2204
+
+Admin account: Administrator
+Password:      vagrant
+
+------------------------------------------------------
+MSG
+
+Vagrant.configure("2") do |config|
+  config.vm.define "lab-sql1" do |subconfig|
+    subconfig.vm.box = "gusztavvargadr/windows-server"
+    subconfig.vm.hostname = "lab-sql1"
+    subconfig.vm.provider :virtualbox do |vb|
+      vb.gui = false
+      vb.customize ["modifyvm", :id, "--memory", "2048", "--cpus", "2"]
+      vb.linked_clone = true
+    end
+    subconfig.vm.network "private_network", ip: "192.168.11.2",
+			virtualbox__intnet: true
+    subconfig.winrm.username = "vagrant"
+    subconfig.winrm.password = "vagrant"
+    subconfig.winrm.transport = :plaintext
+    subconfig.winrm.basic_auth_only = true
+    #Download SQL Server with downloader
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\GetSQLServerDownloader.ps1"
+    #Check SQL Server downloading status
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\CheckSQLDownload.ps1"
+    #Resolve some prerequisites
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\PreDSCInstall.ps1"
+    #Install SQL Server
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\DSCInstallSQLServer.ps1"
+    #Install SQL Server Management Studio
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\GetSSMS.ps1"
+    #Download Test DB (AdventureWorks2019)
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\GetTestDB.ps1"
+    #Install DSC Modules
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\PreDSCInstall.ps1"
+    #Configure hosts file
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\DSCConfigureHostsFile.ps1"
+    #Configure Firewall
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\DSCAllowAllFirewall.ps1"
+    #Configure reboot on demand
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\ConfigureRebootOnNode.ps1"
+    #Install Failover Cluster
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\DSCInstallFailoverCluster.ps1"
+
+  end
+
+  config.vm.define "lab-sql2" do |subconfig|
+    subconfig.vm.box = "gusztavvargadr/windows-server"
+    subconfig.vm.hostname = "lab-sql2"
+    subconfig.vm.provider :virtualbox do |vb|
+      vb.gui = false
+      vb.customize ["modifyvm", :id, "--memory", "2048", "--cpus", "2"]
+      vb.linked_clone = true
+    end
+    subconfig.vm.network "private_network", ip: "192.168.11.3",
+			virtualbox__intnet: true
+    subconfig.winrm.username = "vagrant"
+    subconfig.winrm.password = "vagrant"
+    subconfig.winrm.transport = :plaintext
+    subconfig.winrm.basic_auth_only = true
+    #Download SQL Server with downloader
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\GetSQLServerDownloader.ps1"
+    #Check SQL Server downloading status
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\CheckSQLDownload.ps1"
+    #Resolve some prerequisites
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\PreDSCInstall.ps1"
+    #Install SQL Server
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\DSCInstallSQLServer.ps1"
+    #Install DSC Modules
+      subconfig.vm.provision "shell",
+        path: "..\\provision\\PreDSCInstall.ps1"
+    #Configure hosts file
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\DSCConfigureHostsFile.ps1"
+    #Configure Firewall
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\DSCAllowAllFirewall.ps1"
+    #Configure reboot on demand
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\ConfigureRebootOnNode.ps1"
+    #Install Failover Cluster
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\DSCInstallFailoverCluster.ps1"
+  end
+  config.vm.define "lab-witness" do |subconfig|
+    subconfig.vm.box = "gusztavvargadr/windows-server"
+    subconfig.vm.hostname = "lab-witness"
+    subconfig.vm.provider :virtualbox do |vb|
+      vb.gui = false
+      vb.customize ["modifyvm", :id, "--memory", "2048", "--cpus", "2"]
+      vb.linked_clone = true
+    end
+    subconfig.vm.network "private_network", auto_config: false,
+			virtualbox__intnet: true
+    #Set default gateway
+    subconfig.vm.provision "shell",
+      inline: "New-NetIPAddress -IPAddress 192.168.11.4 -DefaultGateway 192.168.11.1 -PrefixLength 24 -InterfaceAlias 'Ethernet 2'"
+    subconfig.winrm.username = "vagrant"
+    subconfig.winrm.password = "vagrant"
+    subconfig.winrm.transport = :plaintext
+    subconfig.winrm.basic_auth_only = true
+    #Install DSC Modules
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\PreDSCInstall.ps1"
+    #Configure hosts file
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\MSSQL\\DSCConfigureHostsFile.ps1"
+    #Configure Firewall
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\DSCAllowAllFirewall.ps1"
+    #Install Failover Cluster
+    subconfig.vm.provision "shell",
+      path: "..\\provision\\DSCInstallFailoverCluster.ps1"
+    subconfig.vm.provision :reload
+    #Configure failover cluster
+    subconfig.vm.provision "shell",
+      inline: "New-Cluster -Name cluster -Node lab-sql1, lab-sql2, lab-witness -StaticAddress 192.168.11.10 -AdministrativeAccessPoint Dns"
+    subconfig.vm.post_up_message = $post_up_msg
+  end
+end

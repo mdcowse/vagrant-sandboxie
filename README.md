@@ -96,3 +96,12 @@ You can change Ubuntu version (1804 by default) and number of hosts (3 by defaul
 
 ```MSSQL 1.0 - One standalone Microsoft SQL Server host.``` [Read more.](./MSSQL_1.0/README.md)
 * OS: Windows Server 2019, HW: 2 cores, 4GB.
+
+```MSSQL 1.1 - Two SQL Servers in failover cluster and witness.``` [Read more.](./MSSQL_1.1/README.md)
+
+![Image](images/mssql11.png?raw=true)
+
+* lab-sql1.party.hard - OS: Windows Server 2019, HW:2 cores, 2GB. Roles: SQL Server, Failover cluster member.
+* lab-sql2.party.hard - OS: Windows Server 2019, HW:2 cores, 2GB. Roles: SQL Server, Failover cluster member.
+* lab-witness.party.hard - OS: Windows Server 2019, HW:2 cores, 2GB.
+Roles: Failover cluster member.
